@@ -5,32 +5,40 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
 public class JSONFile {
-    public static void main(String[] args) throws FileNotFoundException {
-        String path = "C:\\Users\\82109\\Desktop\\json\\test";
+    public static void main(String[] args) throws IOException {
+        String path = "C:\\Users\\82109\\Desktop\\data\\A_210830_017_M_68";
         File[] files = new File(path).listFiles();
         JsonParser jsonParser = new JsonParser();
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("정상인");
+
+        int i = 0;
         for (File f : files) {
             Reader reader = new FileReader(f);
             JsonObject jsonObject = (JsonObject) jsonParser.parse(reader);
             JsonElement id = jsonObject.get("id");
             JsonElement utterance = jsonObject.get("utterance");
             JsonArray jsonArray = utterance.getAsJsonArray();
-            Map<JsonElement , Integer> map = new HashMap<>();
             for (JsonElement element : jsonArray) {
-                JsonElement label = element.getAsJsonObject().get("label");
-                map.put(label, map.getOrDefault(map,0)+1);
-            }
-            System.out.println(id +" :" +map);
+                XSSFRow row = sheet.createRow(i++);
+                row.createCell(i++).setCellValue(id.getAsString());
 
+            }
         }
+        FileOutputStream fileOutputStream = new FileOutputStream("C:\\summernote\\data.xlsx");
+        workbook.write(fileOutputStream);
+        fileOutputStream.close();
+        System.out.println("액셀파일 생성 성공");
     }
 }
