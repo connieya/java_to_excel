@@ -12,7 +12,9 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class JSONFile {
@@ -30,11 +32,14 @@ public class JSONFile {
             JsonElement id = jsonObject.get("id");
             JsonElement utterance = jsonObject.get("utterance");
             JsonArray jsonArray = utterance.getAsJsonArray();
+            List<String > labelGroup = new ArrayList<>();
             for (JsonElement element : jsonArray) {
-                XSSFRow row = sheet.createRow(i++);
-                row.createCell(i++).setCellValue(id.getAsString());
-
+                String label = element.getAsJsonObject().get("label").getAsString();
+                labelGroup.add(label);
             }
+            XSSFRow row = sheet.createRow(i++);
+            row.createCell(0).setCellValue(id.getAsString());
+            row.createCell(3).setCellValue(labelGroup.toString());
         }
         FileOutputStream fileOutputStream = new FileOutputStream("C:\\summernote\\data.xlsx");
         workbook.write(fileOutputStream);
