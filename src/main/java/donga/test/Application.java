@@ -17,7 +17,7 @@ public class Application {
     static XSSFWorkbook workbook = new XSSFWorkbook();
     static XSSFSheet sheet = workbook.createSheet("data");
     public static void main(String[] args) throws IOException {
-        showFilesInDir("C:\\Users\\82109\\Desktop\\data");
+        showFilesInDir("C:\\Users\\82109\\Desktop\\json");
         XSSFRow initRow = sheet.createRow(0);
         initRow.createCell(0).setCellValue("filePath");
         initRow.createCell(1).setCellValue("id");
@@ -31,7 +31,7 @@ public class Application {
         initRow.createCell(9).setCellValue("end");
         initRow.createCell(10).setCellValue("label");
         initRow.createCell(11).setCellValue("note");
-        FileOutputStream fileOutputStream = new FileOutputStream("C:\\summernote\\test.xlsx");
+        FileOutputStream fileOutputStream = new FileOutputStream("C:\\summernote\\data.xlsx");
         workbook.write(fileOutputStream);
         fileOutputStream.close();
         System.out.println("액셀파일 생성 성공");
@@ -88,7 +88,7 @@ public class Application {
                 row.createCell(9).setCellValue(element.getAsJsonObject().get("end").getAsString());
                 row.createCell(10).setCellValue(element.getAsJsonObject().get("label").getAsString());
                 row.createCell(11).setCellValue(element.getAsJsonObject().get("note").getAsString());
-                System.out.println(file+","+jsonObject.get("id")+","+element.getAsJsonObject().get("label"));
+                System.out.println(file.getParent()+","+jsonObject.get("id")+","+element.getAsJsonObject().get("label")+","+metadata.getAsJsonObject().get("state"));
             }
         }
     }
