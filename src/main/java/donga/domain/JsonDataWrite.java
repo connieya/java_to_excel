@@ -14,10 +14,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class JsonDataWrite {
+    static int i = 1;
     static JsonParser jsonParser = new JsonParser();
     static XSSFWorkbook workbook = new XSSFWorkbook();
     static XSSFSheet sheet = workbook.createSheet("data");
-    static int i = 1;
+
 
     public static void main(String[] args) throws IOException {
         ExcelFactory.createExcelHead(sheet);
@@ -63,28 +64,33 @@ public class JsonDataWrite {
         JsonObject jsonObject = parse.getAsJsonObject();
         JsonArray jsonArray = jsonObject.get("utterance").getAsJsonArray();
         JsonElement metadata = jsonObject.get("metadata");
+        int startIndex = file.getParent().toString().lastIndexOf("\\");
+        String state = file.getParent().toString().substring(startIndex + 1, startIndex + 3);
         Set<String> labelGroup = new HashSet<>();
         Set<String> startGroup = new HashSet<>();
         Set<String> endGroup = new HashSet<>();
         Set<String> noteGroup = new HashSet<>();
-        XSSFRow row = sheet.createRow(i++);
+        XSSFRow row = sheet.createRow(JsonDataWrite.i++);
         if (jsonArray.toString().equals("[]"))  {
             row.createCell(0).setCellValue(file.getParent());
             row.createCell(1).setCellValue(jsonObject.get("id").getAsString());
             row.createCell(2).setCellValue(jsonObject.get("id").getAsString().substring(0, 5));
+            getTargetValue(jsonObject, row);
             row.createCell(4).setCellValue("YES");
             row.createCell(5).setCellValue(metadata.getAsJsonObject().get("age").getAsString());
             row.createCell(6).setCellValue(metadata.getAsJsonObject().get("gender").getAsString());
-            row.createCell(7).setCellValue(metadata.getAsJsonObject().get("state").getAsString());
+            findStateValue(state);
+            row.createCell(7).setCellValue(findStateValue(state));
             row.createCell(8).setCellValue(metadata.getAsJsonObject().get("record_date").getAsString());
             row.createCell(9).setCellValue(metadata.getAsJsonObject().get("bitratio").getAsString());
-            row.createCell(10).setCellValue("라벨링중");
-            row.createCell(11).setCellValue("라벨링중");
-            row.createCell(12).setCellValue("라벨링중");
-            row.createCell(13).setCellValue("라벨링중");
-            row.createCell(14).setCellValue("라벨링중");
+            row.createCell(10).setCellValue("empty");
+            row.createCell(11).setCellValue("empty");
+            row.createCell(12).setCellValue("empty");
+            row.createCell(13).setCellValue("empty");
+            row.createCell(14).setCellValue("empty");
             return;
         }
+
         for (JsonElement element : jsonArray) {
             setLabelGroup(labelGroup, element);
             setStartGroup(startGroup, element);
@@ -95,11 +101,11 @@ public class JsonDataWrite {
             row.createCell(2).setCellValue(jsonObject.get("id").getAsString().substring(0, 5));
             getTargetValue(jsonObject, row);
             row.createCell(4).setCellValue("YES");
-            System.out.print(file +" :  " + element +"  : ");
+            System.out.println(file +" :  " + state +"  : ");
             isDuplicateFile(jsonObject);
             row.createCell(5).setCellValue(metadata.getAsJsonObject().get("age").getAsString());
             row.createCell(6).setCellValue(metadata.getAsJsonObject().get("gender").getAsString());
-            row.createCell(7).setCellValue(metadata.getAsJsonObject().get("state").getAsString());
+            row.createCell(7).setCellValue(findStateValue(state));
             row.createCell(8).setCellValue(metadata.getAsJsonObject().get("record_date").getAsString());
             row.createCell(9).setCellValue(metadata.getAsJsonObject().get("bitratio").getAsString());
             row.createCell(10).setCellValue(element.getAsJsonObject().get("seq").getAsString());
@@ -108,6 +114,17 @@ public class JsonDataWrite {
         row.createCell(12).setCellValue(endGroup.toString());
         row.createCell(13).setCellValue(labelGroup.toString());
         row.createCell(14).setCellValue(noteGroup.toString());
+    }
+
+    private static String findStateValue(String state) {
+        if (state.contains(JsonState.A.name())) {
+            return JsonState.A.name();
+        }
+
+        if (state.contains(JsonState.N.name())) {
+            return JsonState.N.name();
+        }
+        return JsonState.P.name();
     }
 
     private static void setNoteGroup(Set<String> noteGroup, JsonElement element) {
@@ -120,7 +137,6 @@ public class JsonDataWrite {
 
         String id = jsonObject.get("id").getAsString().substring(0, 5);
         String string = sheet.getRow(i - 2).getCell(2).toString();
-        System.out.println(id + " ----" + string);
         if (id.equals(string)) {
             sheet.getRow(i - 2).getCell(4).setCellValue("NO");
         }

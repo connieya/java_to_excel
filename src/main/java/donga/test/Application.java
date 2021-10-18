@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import donga.domain.ExcelFactory;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -14,15 +15,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Application {
+    static int i = 1;
     static JsonParser jsonParser = new JsonParser();
     static XSSFWorkbook workbook = new XSSFWorkbook();
     static XSSFSheet sheet = workbook.createSheet("data");
-    static int i = 1;
+
 
     public static void main(String[] args) throws IOException {
-        createExcelHead();
-        showFilesInDir("C:\\Users\\82109\\Desktop\\data");
-        FileOutputStream fileOutputStream = new FileOutputStream("C:\\summernote\\data.xlsx");
+        ExcelFactory.createExcelHead(sheet);
+        ExcelFactory.setColumnWidth(sheet);
+        showFilesInDir("C:\\Users\\82109\\Desktop\\json");
+        FileOutputStream fileOutputStream = new FileOutputStream("C:\\summernote\\test.xlsx");
         workbook.write(fileOutputStream);
         fileOutputStream.close();
         System.out.println("액셀파일 생성 성공");
@@ -62,7 +65,6 @@ public class Application {
         JsonObject jsonObject = parse.getAsJsonObject();
         JsonArray jsonArray = jsonObject.get("utterance").getAsJsonArray();
         JsonElement metadata = jsonObject.get("metadata");
-        setColumnWidth();
         Set<String> labelGroup = new HashSet<>();
         Set<String> startGroup = new HashSet<>();
         Set<String> endGroup = new HashSet<>();
@@ -72,19 +74,21 @@ public class Application {
             row.createCell(0).setCellValue(file.getParent());
             row.createCell(1).setCellValue(jsonObject.get("id").getAsString());
             row.createCell(2).setCellValue(jsonObject.get("id").getAsString().substring(0, 5));
+            getTargetValue(jsonObject, row);
             row.createCell(4).setCellValue("YES");
             row.createCell(5).setCellValue(metadata.getAsJsonObject().get("age").getAsString());
             row.createCell(6).setCellValue(metadata.getAsJsonObject().get("gender").getAsString());
             row.createCell(7).setCellValue(metadata.getAsJsonObject().get("state").getAsString());
             row.createCell(8).setCellValue(metadata.getAsJsonObject().get("record_date").getAsString());
             row.createCell(9).setCellValue(metadata.getAsJsonObject().get("bitratio").getAsString());
-            row.createCell(10).setCellValue("라벨링중");
-            row.createCell(11).setCellValue("라벨링중");
-            row.createCell(12).setCellValue("라벨링중");
-            row.createCell(13).setCellValue("라벨링중");
-            row.createCell(14).setCellValue("라벨링중");
+            row.createCell(10).setCellValue("empty");
+            row.createCell(11).setCellValue("empty");
+            row.createCell(12).setCellValue("empty");
+            row.createCell(13).setCellValue("empty");
+            row.createCell(14).setCellValue("empty");
             return;
         }
+
         for (JsonElement element : jsonArray) {
             setLabelGroup(labelGroup, element);
             setStartGroup(startGroup, element);
@@ -95,7 +99,7 @@ public class Application {
             row.createCell(2).setCellValue(jsonObject.get("id").getAsString().substring(0, 5));
             getTargetValue(jsonObject, row);
             row.createCell(4).setCellValue("YES");
-            System.out.print(file +" :  " + element +"  : ");
+            System.out.println(file.getParent() +" :  " + element +"  : ");
             isDuplicateFile(jsonObject);
             row.createCell(5).setCellValue(metadata.getAsJsonObject().get("age").getAsString());
             row.createCell(6).setCellValue(metadata.getAsJsonObject().get("gender").getAsString());
@@ -120,7 +124,6 @@ public class Application {
 
         String id = jsonObject.get("id").getAsString().substring(0, 5);
         String string = sheet.getRow(i - 2).getCell(2).toString();
-        System.out.println(id + " ----" + string);
         if (id.equals(string)) {
             sheet.getRow(i - 2).getCell(4).setCellValue("NO");
         }
@@ -156,39 +159,5 @@ public class Application {
         } else {
             row.createCell(3).setCellValue("YES");
         }
-    }
-
-    private static void createExcelHead() {
-        XSSFRow initRow = sheet.createRow(0);
-        initRow.createCell(0).setCellValue("filePath");
-        initRow.createCell(1).setCellValue("id");
-        initRow.createCell(2).setCellValue("ID(REPLACE)");
-        initRow.createCell(3).setCellValue("Target1");
-        initRow.createCell(4).setCellValue("Target2");
-        initRow.createCell(5).setCellValue("age");
-        initRow.createCell(6).setCellValue("gender");
-        initRow.createCell(7).setCellValue("state");
-        initRow.createCell(8).setCellValue("record_date");
-        initRow.createCell(9).setCellValue("bitratio");
-        initRow.createCell(10).setCellValue("seq");
-        initRow.createCell(11).setCellValue("start");
-        initRow.createCell(12).setCellValue("end");
-        initRow.createCell(13).setCellValue("label");
-        initRow.createCell(14).setCellValue("note");
-    }
-
-    private static void setColumnWidth() {
-        sheet.setColumnWidth(0, 13500);
-        sheet.setColumnWidth(1, 3500);
-        sheet.setColumnWidth(2, 3000);
-        sheet.setColumnWidth(3, 2500);
-        sheet.setColumnWidth(4, 2500);
-        sheet.setColumnWidth(6, 2500);
-        sheet.setColumnWidth(8, 3000);
-        sheet.setColumnWidth(9, 2500);
-        sheet.setColumnWidth(11, 15000);
-        sheet.setColumnWidth(12, 15000);
-        sheet.setColumnWidth(13, 15000);
-        sheet.setColumnWidth(14, 8000);
     }
 }
