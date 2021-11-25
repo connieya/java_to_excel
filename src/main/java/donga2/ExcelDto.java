@@ -3,8 +3,6 @@ package donga2;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -35,9 +33,11 @@ public class ExcelDto {
             if (ext.equals("json") && id.compareTo("05-00") > 0) {
                 Reader reader = new FileReader(json);
                 JsonElement parse = jsonParser.parse(reader);
-                JsonElement element = parse.getAsJsonObject().get("utterance");
-                JsonElement fileName = parse.getAsJsonObject().get("id");
-                System.out.println(file.getName()+",  "+fileName+ " : " + element);
+                if (parse.isJsonObject()) {
+                    JsonElement element = parse.getAsJsonObject().get("utterance");
+                    JsonElement fileName = parse.getAsJsonObject().get("id");
+                    System.out.println(file.getName() + ",  " + fileName + " : " + element);
+                }
             }
         }
     }
