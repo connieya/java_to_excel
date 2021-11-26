@@ -12,7 +12,7 @@ public class Application {
         ExcelFactory.initExcelHead(sheet);
         FileOutputStream fileOutputStream = new FileOutputStream("C:\\summernote\\result.xlsx");
         String filePath = "C:\\Users\\82109\\Desktop\\data";
-        excelDto.SearchFilePath(filePath);
+        excelDto.searchFilePath(filePath);
         excelDto.workbook.write(fileOutputStream);
         System.out.println("json 데이터 엑셀 파일로 쓰기 완료");
         fileOutputStream.close();
