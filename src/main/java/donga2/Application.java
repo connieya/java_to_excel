@@ -11,7 +11,7 @@ public class Application {
         Sheet sheet= excelDto.sheet;
         ExcelFactory.initExcelHead(sheet);
         FileOutputStream fileOutputStream = new FileOutputStream("C:\\summernote\\result.xlsx");
-        String filePath = "C:\\Users\\82109\\Desktop\\data";
+        String filePath = "C:\\Users\\82109\\Desktop\\utterance\\data";
         excelDto.searchFilePath(filePath);
         excelDto.workbook.write(fileOutputStream);
         System.out.println("json 데이터 엑셀 파일로 쓰기 완료");

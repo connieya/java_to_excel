@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FileFactory {
-    static Map<String ,Integer> fileKey = new HashMap<>();
+    public static Map<String ,Integer> fileKey = new HashMap<>();
     static int fileSeq[] = {30,30,10};
     static int index =2;
 
@@ -16,6 +16,10 @@ public class FileFactory {
                 index += 4;
             }
         }
+    }
+
+    static Map<String, Integer> getFileKey() {
+        return fileKey;
     }
 
 }

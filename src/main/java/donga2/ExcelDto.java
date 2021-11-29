@@ -4,26 +4,33 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.io.*;
+import java.util.Map;
 
 public class ExcelDto {
     static final int START_ROW_NUMBER = 3;
-
     JsonParser jsonParser = new JsonParser();
     Workbook workbook = new SXSSFWorkbook();
     Sheet sheet = workbook.createSheet();
     int rowIndex = START_ROW_NUMBER;
+    Map<String, Integer> fileKey;
+    Row row;
 
+    public ExcelDto() {
+        fileKey = FileFactory.fileKey;
+        workbook.createCellStyle().setAlignment(HorizontalAlignment.LEFT);
+    }
 
     public void searchFilePath(String filePath) throws FileNotFoundException {
         File path = new File(filePath);
         File[] files = path.listFiles();
         for (File file : files) {
-            sheet.createRow(rowIndex++).createCell(0).setCellValue(file.getName());
+            row = sheet.createRow(rowIndex++);
+            row.createCell(0).setCellValue(file.getName());
             searchJsonFiles(file);
         }
     }
@@ -50,12 +57,12 @@ public class ExcelDto {
             int utterance_g4 = 0;
             int utterance_d1 = 0;
             JsonArray utterance = parse.getAsJsonObject().get("utterance").getAsJsonArray();
-            JsonElement fileName = parse.getAsJsonObject().get("id");
+            String fileName = parse.getAsJsonObject().get("id").getAsString().substring(0, 5);
             // 05-01 => 0~3
             for (JsonElement element : utterance) {
                 String label = element.getAsJsonObject().get("label").getAsString();
                 String[] labels = label.split(",");
-                for (String str : labels){
+                for (String str : labels) {
                     String trim = str.trim();
                     if (trim.equals("오발화")) {
                         utterance_o2++;
@@ -72,14 +79,18 @@ public class ExcelDto {
                     }
                 }
             }
+            int firstIndex = fileKey.getOrDefault(fileName, 0);
             System.out.println(
                     String.format(
-                            "%s  / %s  : 오발화 : %d , 반복발화 : %d , 간투어 : %d , 단절발화 : %d"
-                            ,file.getName(),fileName,utterance_o2,utterance_b3,utterance_g4,utterance_d1)
+                            "%s  / %s  : 오발화 : %d , 반복발화 : %d , 간투어 : %d , 단절발화 : %d , %d"
+                            , file.getName(), fileName, utterance_o2, utterance_b3, utterance_g4, utterance_d1, firstIndex)
             );
-
-            // excel createCell => 2부터
-            // 2~5 , 6~9 , 10~13
+            if (firstIndex != 0) {
+                row.createCell(firstIndex).setCellValue(utterance_d1);
+                row.createCell(firstIndex + 1).setCellValue(utterance_b3);
+                row.createCell(firstIndex + 2).setCellValue(utterance_o2);
+                row.createCell(firstIndex + 3).setCellValue(utterance_g4);
+            }
         }
     }
 
